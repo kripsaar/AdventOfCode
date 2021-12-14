@@ -1,3 +1,5 @@
+import time
+
 rules = {}
 char_count = {}
 
@@ -53,14 +55,26 @@ def calc_score():
     most_common_value = char_count[most_common]
     least_common_value = char_count[least_common]
     score = most_common_value - least_common_value
+    print()
     print(f"Most common char is {most_common} with {most_common_value} occurances")
     print(f"Least common char is {least_common} with {least_common_value} occurances")
     print()
     print(f"Score = {score}")
 
+def run(filename: str, steps: int):
+    global rules
+    rules = {}
+    global char_count
+    char_count = {}
+    start = time.perf_counter_ns()
+    pairs = parse_input(filename)
+    for i in range(steps):
+        pairs = step(pairs)
+    calc_score()
+    end = time.perf_counter_ns()
+    duration = int((end - start) / 1_000_000)
+    print()
+    print(f"Run on {filename} with {steps} steps")
+    print(f"Duration: {duration}ms")
 
-pairs = parse_input("input-14")
-
-for i in range(40):
-    pairs = step(pairs)
-calc_score()
+run("input-14", 40)

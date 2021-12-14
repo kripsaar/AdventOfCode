@@ -1,3 +1,5 @@
+import time
+
 rules = {}
 char_count = {}
 
@@ -41,9 +43,20 @@ def calc_score():
     print()
     print(f"Score = {score}")
 
+def run(filename: str, steps: int):
+    global rules
+    rules = {}
+    global char_count
+    char_count = {}
+    start = time.perf_counter_ns()
+    polymer = parse_input(filename)
+    for i in range(steps):
+        polymer = step(polymer)
+    calc_score()
+    end = time.perf_counter_ns()
+    duration = int((end - start) / 1_000_000)
+    print()
+    print(f"Run on {filename} with {steps} steps")
+    print(f"Duration: {duration}ms")
 
-polymer = parse_input("input-14")
-
-for i in range(10):
-    polymer = step(polymer)
-calc_score()
+run("input-14", 10)
