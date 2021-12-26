@@ -4,7 +4,8 @@ from functools import cache
 import itertools
 import bisect
 
-all_positions = [(0, 0), (1, 0), (3, 0), (5, 0), (7, 0), (9, 0), (10, 0), (2, 1), (4, 1), (6, 1), (8, 1), (2, 2), (4, 2), (6, 2), (8, 2)]
+
+all_positions = [(0, 0), (1, 0), (3, 0), (5, 0), (7, 0), (9, 0), (10, 0), (2, 1), (4, 1), (6, 1), (8, 1), (2, 2), (4, 2), (6, 2), (8, 2), (2, 3), (4, 3), (6, 3), (8, 3), (2, 4), (4, 4), (6, 4), (8, 4)]
 
 energy_cost = {"A": 1, "B": 10, "C": 100, "D": 1000}
 
@@ -37,6 +38,24 @@ class State:
                 string += self.positions[(x, 2)]
             string += "#"
             x += 2
+        string += "  \n  #"
+        x = 2
+        while x < 10:
+            if (x, 3) not in self.positions:
+                string += "."
+            else:
+                string += self.positions[(x, 3)]
+            string += "#"
+            x += 2
+        string += "  \n  #"
+        x = 2
+        while x < 10:
+            if (x, 4) not in self.positions:
+                string += "."
+            else:
+                string += self.positions[(x, 4)]
+            string += "#"
+            x += 2
         string += "  \n  #########"
         return string
 
@@ -48,7 +67,7 @@ class State:
     def __hash__(self) -> int:
         return hash(frozenset(self.positions.items()))
 
-final_state = State({(2,1) : "A", (2,2) : "A", (4,1) : "B", (4,2) : "B",  (6,1) : "C", (6,2) : "C", (8,1) : "D", (8,2) : "D"})
+final_state = State({(2,1) : "A", (2,2) : "A", (2,3) : "A", (2,4) : "A", (4,1) : "B", (4,2) : "B", (4,3) : "B", (4,4) : "B",  (6,1) : "C", (6,2) : "C", (6,3) : "C", (6,4) : "C", (8,1) : "D", (8,2) : "D", (8,3) : "D", (8,4) : "D"})
 
 @cache
 def path_exists(state: State, old_pos: tuple, new_pos: tuple) -> bool:
@@ -86,6 +105,10 @@ def is_move_legal(state: State, old_pos: tuple, new_pos: tuple) -> bool:
         # Destination already occupied
         return False
 
+    if new_pos in [(2,0), (4,0), (6,0), (8,0)]:
+        # Amphipods will never stop on the space immediately outside any room.
+        return False
+
     if new_pos[1] > 0:
         # Amphipods will never move from the hallway into a room
         if (state.positions[old_pos], new_pos[0]) not in [("A", 2), ("B", 4), ("C", 6), ("D", 8)]:
@@ -93,15 +116,13 @@ def is_move_legal(state: State, old_pos: tuple, new_pos: tuple) -> bool:
             return False
         
         # and that room contains no amphipods which do not also have that room as their own destination
-        other_pos = (new_pos[0], (new_pos[1] % 2) + 1)
-        if other_pos in state.positions and state.positions[other_pos] != state.positions[old_pos]:
-            return False
+        x = new_pos[0]
+        for y in range(1, 5):
+            if (x, y) in state.positions and state.positions[(x, y)] != state.positions[old_pos]:
+                return False
     
     # Once an amphipod stops moving in the hallway, it will stay in that spot until it can move into a room
     if old_pos[1] == 0 and new_pos[1] == 0:
-        return False
-
-    if not path_exists(state, old_pos, new_pos):
         return False
 
     # Amphipod in right room will not want to leave room
@@ -113,7 +134,7 @@ def is_move_legal(state: State, old_pos: tuple, new_pos: tuple) -> bool:
             (x == 6 and state.positions[old_pos] == "C") or
             (x == 8 and state.positions[old_pos] == "D")):
             parked = True
-            for y in range(old_pos[1] + 1, 3):
+            for y in range(old_pos[1] + 1, 5):
                 if not ((x,y) in state.positions and state.positions[(x,y)] == state.positions[old_pos]):
                     parked = False
         if parked:
@@ -122,9 +143,12 @@ def is_move_legal(state: State, old_pos: tuple, new_pos: tuple) -> bool:
     # There is a better position in a room available
     if new_pos[1] > 0:
         x = new_pos[0]
-        for y in range(new_pos[1] + 1, 3):
+        for y in range(new_pos[1] + 1, 5):
             if (x, y) not in state.positions:
                 return False
+
+    if not path_exists(state, old_pos, new_pos):
+        return False
 
     return True
 
@@ -161,15 +185,32 @@ def score_state(state: State) -> int:
     for pos in state.positions.keys():
         dest = (0,0)
         if state.positions[pos] == "A":
-            dest = (2,2)
+            dest = (2,4)
         if state.positions[pos] == "B":
-            dest = (4,2)
+            dest = (4,4)
         if state.positions[pos] == "C":
-            dest = (6,2)
+            dest = (6,4)
         if state.positions[pos] == "D":
-            dest = (8,2)
-        score += min(calc_cost(state, pos, dest), calc_cost(state, pos, (dest[0], dest[1] - 1)))
+            dest = (8,4)
+        score += min(calc_cost(state, pos, dest), calc_cost(state, pos, (dest[0], dest[1] - 1)), calc_cost(state, pos, (dest[0], dest[1] - 2)), calc_cost(state, pos, (dest[0], dest[1] - 3)))
     return score
+
+def init_part_two(state: State) -> State:
+    new_pos = state.positions.copy()
+    for x, y in state.positions.keys():
+        if y == 2:
+            pos = new_pos.pop((x,y))
+            new_pos[(x, 4)] = pos
+    new_pos[(2, 2)] = "D"
+    new_pos[(2, 3)] = "D"
+    new_pos[(4, 2)] = "C"
+    new_pos[(4, 3)] = "B"
+    new_pos[(6, 2)] = "B"
+    new_pos[(6, 3)] = "A"
+    new_pos[(8, 2)] = "A"
+    new_pos[(8, 3)] = "C"
+
+    return State(new_pos)
 
 def parse_input(filename: str):
     positions = {}
@@ -179,7 +220,7 @@ def parse_input(filename: str):
             for x, char in enumerate(line):
                 if bool(re.match("[ABCD]", char)):
                     positions[(x, y)] = char
-    return State(positions)
+    return init_part_two(State(positions))
 
 def sort(state: State):
     available_moves = [(0, state)]
@@ -256,16 +297,12 @@ initial_state = parse_input("input-23")
 print(initial_state)
 
 # cost, state = sort(initial_state)
-cost, state = sort_with_heuristic(initial_state)
+cost = sort_dfs(initial_state)
 
 print(f"Cost: {cost}")
-print("State:")
-print()
-print(state)
-
-# cost = sort_dfs(initial_state)
-
-# print(f"Cost: {cost}")
+# print("State:")
+# print()
+# print(state)
 
 # cost, state = do_move(initial_state, (6, 1), (3, 0))
 # print(f"Cost: {cost}")
