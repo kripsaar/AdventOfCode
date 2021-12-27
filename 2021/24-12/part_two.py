@@ -119,5 +119,5 @@ def parse_input(filename: str):
 
 
 print()
-print(f"Test number: 59998426997979")
-run_program("input-24", [5,9,9,9,8,4,2,6,9,9,7,9,7,9])
+print(f"Test number: 13621111481315")
+run_program("input-24", [1,3,6,2,1,1,1,1,4,8,1,3,1,5])
