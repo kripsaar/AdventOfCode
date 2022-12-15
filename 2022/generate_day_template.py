@@ -1,5 +1,6 @@
 import os
 import requests
+import sys
 from datetime import date
 
 def create_input(date_string, day_number: int):
@@ -16,7 +17,9 @@ def create(day_number: int):
     open(date_string + f'/input-{day_number:02d}-test', mode='a').close()
     create_input(date_string, day_number)
 
+day_number = date.today().day 
 
-today = date.today()
+if len(sys.argv) > 1 and sys.argv[1].isnumeric():
+    day_number = int(sys.argv[1])
 
-create(today.day)
+create(day_number)
