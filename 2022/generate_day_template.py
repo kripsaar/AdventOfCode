@@ -2,6 +2,18 @@ import os
 import requests
 import sys
 from datetime import date
+from pathlib import Path
+
+template = """
+
+def parse_input(filename: str):
+
+    with open(filename, mode = 'r') as file:
+        return
+
+filename = '{input_name}'
+parse_input(filename)
+"""
 
 def create_input(date_string, day_number: int):
     url = f'https://adventofcode.com/2022/day/{day_number}/input'
@@ -10,10 +22,18 @@ def create_input(date_string, day_number: int):
     with open(date_string + f'/input-{day_number:02d}', mode='w') as input_file:
         input_file.write(response.text.rstrip('\n'))
 
+def write_template(day_number: int, filename: str):
+    if Path(filename).is_file():
+        # Already exists, nothing to do
+        return
+    with open(filename, mode='a') as file:
+        file.write(template.format(input_name=f'input-{day_number:02d}-test'))
+
+
 def create(day_number: int):
     date_string = f'{day_number:02d}-12'
-    os.mkdir(date_string)
-    open(date_string + '/part_one.py', mode='a').close()
+    os.makedirs(date_string, exist_ok=True)
+    write_template(day_number, date_string + '/part_one.py')
     open(date_string + f'/input-{day_number:02d}-test', mode='a').close()
     create_input(date_string, day_number)
 
