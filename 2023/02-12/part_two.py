@@ -19,6 +19,18 @@ def check_line(line: str) -> bool:
             return False
     return True
 
+def score_game(game_number: int, line: str):
+    min_cubes = {'red':0, 'green': 0, 'blue':0}
+    line = line.replace(';', ',').strip()
+    for number_with_color in line.split(', '):
+        num_str, color = number_with_color.split(' ')
+        num = int(num_str)
+        if num > min_cubes[color]:
+            min_cubes[color] = num
+    result = min_cubes['red'] * min_cubes['green'] * min_cubes['blue']
+    # print(f'Game {game_number} power = {result}')
+    return result
+
 def read_input(filename: str):
     sum = 0
     with open(filename, 'r') as file:
@@ -26,10 +38,7 @@ def read_input(filename: str):
             start = line.find(':')
             line_number = int(line[line.find(' ') + 1:start])
             line = line[start+2:]
-            if not check_line(line):
-                print(f"Line {line_number} is invalid.")
-                continue
-            sum += line_number
+            sum += score_game(line_number, line)
     print(sum)
 
 read_input("input-02")
