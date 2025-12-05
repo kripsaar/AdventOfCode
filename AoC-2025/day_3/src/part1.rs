@@ -1,27 +1,25 @@
-use crate::commons::{parse_batteries_from_line, JoltageBank};
-use std::cmp::Ordering;
-use std::num::ParseIntError;
+use crate::commons::{
+    calculate_joltage, calculate_total_joltage, parse_batteries_from_line, parse_input, JoltageBank,
+};
 use std::str::FromStr;
 
 pub fn part1() {
     let input_3 = include_str!("../resources/input-3");
-    let joltage_banks = parse_input(input_3);
+    let joltage_banks = parse_input::<JoltageBankPart1>(input_3);
     let total_joltage = calculate_total_joltage(joltage_banks);
     println!("Part 1: {}", total_joltage);
 }
 
-fn calculate_total_joltage<I>(joltage_banks: Vec<I>) -> u64
-where
-    I: JoltageBank,
-{
-    joltage_banks
-        .iter()
-        .map(|joltage_bank| joltage_bank.calculate_joltage())
-        .sum()
-}
-
 struct JoltageBankPart1 {
     batteries: Vec<u8>,
+}
+
+impl FromStr for JoltageBankPart1 {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::new(parse_batteries_from_line(s)))
+    }
 }
 
 impl JoltageBank for JoltageBankPart1 {
@@ -30,40 +28,8 @@ impl JoltageBank for JoltageBankPart1 {
     }
 
     fn calculate_joltage(&self) -> u64 {
-        let (left_idx, left) = self.batteries[..(self.batteries.len() - 1)]
-            .iter()
-            .enumerate()
-            .max_by(|(left_idx, left_value), (right_idx, right_value)| {
-                match left_value.cmp(right_value) {
-                    Ordering::Greater => Ordering::Greater,
-                    Ordering::Less => Ordering::Less,
-                    Ordering::Equal => match left_idx.cmp(right_idx) {
-                        Ordering::Equal => Ordering::Equal,
-                        Ordering::Greater => Ordering::Less,
-                        Ordering::Less => Ordering::Greater,
-                    },
-                }
-            })
-            .unwrap();
-        let right = self.batteries[(left_idx + 1)..].iter().max().unwrap();
-        format!("{}{}", left, right).parse::<u64>().unwrap()
+        calculate_joltage(&self.batteries, 2)
     }
-}
-
-impl FromStr for JoltageBankPart1 {
-    type Err = ParseIntError;
-    fn from_str(str: &str) -> Result<Self, Self::Err> {
-        Ok(JoltageBankPart1::new(parse_batteries_from_line(str)))
-    }
-}
-
-fn parse_input(input: &str) -> Vec<JoltageBankPart1> {
-    input
-        .trim()
-        .lines()
-        .map(JoltageBankPart1::from_str)
-        .flatten()
-        .collect()
 }
 
 #[cfg(test)]
@@ -95,7 +61,7 @@ mod tests {
     #[test]
     fn test_example() {
         let example_input = include_str!("../resources/input-3-test");
-        let joltage_banks = parse_input(example_input);
+        let joltage_banks = parse_input::<JoltageBankPart1>(example_input);
         let total_joltage = calculate_total_joltage(joltage_banks);
         assert_eq!(total_joltage, 357);
     }
