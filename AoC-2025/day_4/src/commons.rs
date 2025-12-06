@@ -48,7 +48,7 @@ impl Grid {
             .rolls
             .iter()
             .filter(|roll| self.is_roll_reachable(roll))
-            .map(|roll| roll.clone())
+            .cloned()
             .collect();
         let reachable_rolls_count = reachable_rolls.len();
         for reachable_roll in reachable_rolls {

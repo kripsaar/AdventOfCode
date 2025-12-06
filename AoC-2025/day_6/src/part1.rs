@@ -10,7 +10,7 @@ pub fn part1() {
 fn parse_input(input: &str) -> Vec<Problem> {
     let mut problem_builders = Vec::<ProblemBuilder>::new();
     for line in input.lines() {
-        let components: Vec<&str> = line.trim().split_whitespace().collect();
+        let components: Vec<&str> = line.split_whitespace().collect();
         if problem_builders.is_empty() {
             problem_builders.extend(vec![ProblemBuilder::new(); components.len()]);
         }

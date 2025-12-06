@@ -25,8 +25,7 @@ impl FromStr for FreshnessDatabase {
                 let limits: Vec<usize> = line
                     .trim()
                     .split("-")
-                    .map(|str| str.parse::<usize>())
-                    .flatten()
+                    .flat_map(|str| str.parse::<usize>())
                     .collect();
                 limits[0]..=limits[1]
             })
@@ -51,8 +50,7 @@ impl FreshnessDatabase {
     pub fn is_ingredient_fresh(&self, ingredient: &Ingredient) -> bool {
         self.freshness_ranges
             .iter()
-            .find(|range| range.contains(&ingredient.id))
-            .is_some()
+            .any(|range| range.contains(&ingredient.id))
     }
 
     pub fn count_fresh_ingredients(&self) -> usize {

@@ -17,7 +17,7 @@ fn play(input: &str) -> u32 {
 }
 
 impl Safe {
-    fn move_dial(self: &Self, rotation: Rotation) -> Safe {
+    fn move_dial(&self, rotation: Rotation) -> Safe {
         let current_position = match rotation {
             Left(distance) => {
                 sub_with_wrap(self.current_position, distance, self.position_count).result

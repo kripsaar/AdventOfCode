@@ -22,15 +22,15 @@ impl InvalidId for InvalidIdPart1 {
     fn next_invalid_id(number: u64) -> Self {
         let number_string = number.to_string();
         let (left_str, right_str) = number_string.split_at(number_string.len() / 2);
-        let mut left = left_str.parse().unwrap_or_else(|_| 0);
-        let right = right_str.parse().unwrap_or_else(|_| 0);
+        let mut left = left_str.parse().unwrap_or(0);
+        let right = right_str.parse().unwrap_or(0);
         if left <= right {
             if left_str.len() < right_str.len() {
                 left = format!("1{}", "0".repeat(right_str.len() - 1))
                     .parse()
                     .unwrap();
             } else {
-                left = left + 1;
+                left += 1;
             }
         }
         let id = format!("{}{}", left, left).parse().unwrap();

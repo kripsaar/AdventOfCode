@@ -17,8 +17,8 @@ impl Problem {
 
     pub fn solve(&self) -> i64 {
         match self.operation {
-            Operation::Addition => self.numbers.iter().fold(0, |left, right| left + right),
-            Operation::Multiplication => self.numbers.iter().fold(1, |left, right| left * right),
+            Operation::Addition => self.numbers.iter().sum::<i64>(),
+            Operation::Multiplication => self.numbers.iter().product::<i64>(),
         }
     }
 }
@@ -60,9 +60,9 @@ impl ProblemBuilder {
         if self.numbers.len() < 2 {
             return Err("Fewer than 2 numbers in Problem".to_string());
         }
-        Ok(Problem {
-            numbers: self.numbers.clone(),
-            operation: self.operation.clone().unwrap(),
-        })
+        Ok(Problem::new(
+            self.numbers.clone(),
+            self.operation.clone().unwrap(),
+        ))
     }
 }

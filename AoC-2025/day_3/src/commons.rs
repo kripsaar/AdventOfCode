@@ -9,8 +9,7 @@ pub trait JoltageBank: FromStr {
 pub fn parse_batteries_from_line(line: &str) -> Vec<u8> {
     line.trim()
         .chars()
-        .map(|c| c.to_string().parse())
-        .flatten()
+        .flat_map(|c| c.to_string().parse())
         .collect()
 }
 
@@ -28,7 +27,7 @@ pub fn parse_input<J>(input: &str) -> Vec<J>
 where
     J: JoltageBank,
 {
-    input.trim().lines().map(J::from_str).flatten().collect()
+    input.trim().lines().flat_map(J::from_str).collect()
 }
 
 pub fn calculate_joltage(batteries: &[u8], remaining_battery_count: usize) -> u64 {

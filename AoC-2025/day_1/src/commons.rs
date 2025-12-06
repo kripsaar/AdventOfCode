@@ -6,6 +6,12 @@ pub struct Safe {
     pub zero_counter: u32,
 }
 
+impl Default for Safe {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Safe {
     pub fn new() -> Safe {
         Safe {
@@ -17,11 +23,7 @@ impl Safe {
 }
 
 pub fn parse_input(input: &str) -> Vec<Rotation> {
-    input
-        .lines()
-        .map(|line| parse_line(line))
-        .flatten()
-        .collect()
+    input.lines().filter_map(parse_line).collect()
 }
 
 pub enum Rotation {

@@ -49,8 +49,7 @@ where
         input_str
             .trim()
             .split(",")
-            .map(Self::from_str)
-            .flatten()
+            .flat_map(Self::from_str)
             .collect()
     }
 
